@@ -1,0 +1,107 @@
+mutation createSeedData @transaction @auth(level: USER, insecureReason: "This mutation inserts seed data and does not expose sensitive information or rely on auth.uid.") {
+  user_insertMany(data: [
+    {
+      id: "user-1-uuid",
+      username: "john.doe",
+      email: "john.doe@example.com",
+      createdAt: "2023-01-01T10:00:00Z",
+      displayName: "John Doe",
+      role: "admin"
+    },
+    {
+      id: "user-2-uuid",
+      username: "jane.smith",
+      email: "jane.smith@example.com",
+      createdAt: "2023-01-01T10:05:00Z",
+      displayName: "Jane Smith",
+      role: "user"
+    }
+  ])
+  category_insertMany(data: [
+    {
+      id: "category-1-uuid",
+      name: "Financial",
+      description: "Reports related to financial matters",
+      createdAt: "2023-01-01T11:00:00Z"
+    },
+    {
+      id: "category-2-uuid",
+      name: "HR",
+      description: "Reports related to human resources",
+      createdAt: "2023-01-01T11:05:00Z"
+    }
+  ])
+  report_insertMany(data: [
+    {
+      id: "report-1-uuid",
+      title: "Quarterly Financials Q1 2023",
+      description: "Detailed financial report for the first quarter of 2023",
+      status: "Submitted",
+      createdAt: "2023-01-02T09:00:00Z",
+      updatedAt: "2023-01-02T09:00:00Z",
+      dueDate: "2023-03-31",
+      submissionDate: "2023-03-25",
+      authorId: "user-1-uuid",
+      categoryId: "category-1-uuid"
+    },
+    {
+      id: "report-2-uuid",
+      title: "Employee Onboarding Statistics",
+      description: "Statistics on new employee onboarding for the past month",
+      status: "In Progress",
+      createdAt: "2023-01-03T14:30:00Z",
+      updatedAt: "2023-01-03T14:30:00Z",
+      dueDate: "2023-02-15",
+      authorId: "user-2-uuid",
+      categoryId: "category-2-uuid"
+    }
+  ])
+  reportFile_insertMany(data: [
+    {
+      id: "file-1-uuid",
+      reportId: "report-1-uuid",
+      fileName: "Q1_Financials.pdf",
+      fileType: "application/pdf",
+      fileSize: 1024000,
+      fileUrl: "https://example.com/files/Q1_Financials.pdf",
+      uploadedAt: "2023-01-02T09:15:00Z",
+      description: "PDF version of the Q1 financial report"
+    },
+    {
+      id: "file-2-uuid",
+      reportId: "report-1-uuid",
+      fileName: "Q1_Financials_Summary.xlsx",
+      fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      fileSize: 51200,
+      fileUrl: "https://example.com/files/Q1_Financials_Summary.xlsx",
+      uploadedAt: "2023-01-02T09:20:00Z",
+      description: "Excel summary of the Q1 financial report"
+    }
+  ])
+  reportLog_insertMany(data: [
+    {
+      id: "log-1-uuid",
+      reportId: "report-1-uuid",
+      userId: "user-1-uuid",
+      action: "Created Report",
+      timestamp: "2023-01-02T09:00:00Z",
+      details: "Report 'Quarterly Financials Q1 2023' created."
+    },
+    {
+      id: "log-2-uuid",
+      reportId: "report-1-uuid",
+      userId: "user-1-uuid",
+      action: "Uploaded File",
+      timestamp: "2023-01-02T09:15:00Z",
+      details: "File 'Q1_Financials.pdf' uploaded to 'Quarterly Financials Q1 2023'."
+    },
+    {
+      id: "log-3-uuid",
+      reportId: "report-2-uuid",
+      userId: "user-2-uuid",
+      action: "Created Report",
+      timestamp: "2023-01-03T14:30:00Z",
+      details: "Report 'Employee Onboarding Statistics' created."
+    }
+  ])
+}

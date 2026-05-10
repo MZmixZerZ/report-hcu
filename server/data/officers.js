@@ -1,0 +1,138 @@
+/**
+ * ข้อมูลเจ้าหน้าที่ประจำหน่วยงาน (Department Officers)
+ * - email: officer_<id>@hcu.ac.th
+ * - department ต้องตรงกับ name ใน departments.js
+ * - departmentId ต้องตรงกับ id ใน departments.js
+ * - password: hcu1234 (default)
+ */
+
+const OFFICERS = [
+  {
+    username: 'officer_general',
+    email: 'officer_general@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่กองกลาง',
+    department: 'กองกลาง',
+    departmentId: 'general',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_finance',
+    email: 'officer_finance@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่กองคลัง',
+    department: 'กองคลัง',
+    departmentId: 'finance',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_hr',
+    email: 'officer_hr@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่กองทรัพยากรบุคคล',
+    department: 'กองทรัพยากรบุคคล',
+    departmentId: 'hr',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_planning',
+    email: 'officer_planning@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่กองแผนและพัฒนา',
+    department: 'กองแผนและพัฒนา',
+    departmentId: 'planning',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_supply',
+    email: 'officer_supply@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่กองพัสดุ',
+    department: 'กองพัสดุ',
+    departmentId: 'supply',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_building',
+    email: 'officer_building@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่กองอาคารสถานที่',
+    department: 'กองอาคารสถานที่',
+    departmentId: 'building',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_digital',
+    email: 'officer_digital@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่ศูนย์ดิจิทัลเพื่อการศึกษา',
+    department: 'ศูนย์ดิจิทัลเพื่อการศึกษา',
+    departmentId: 'digital',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_library',
+    email: 'officer_library@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่ศูนย์บรรณสารสนเทศ',
+    department: 'ศูนย์บรรณสารสนเทศ',
+    departmentId: 'library',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_culture',
+    email: 'officer_culture@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่ศูนย์วัฒนธรรม',
+    department: 'ศูนย์วัฒนธรรม',
+    departmentId: 'culture',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_bookstore',
+    email: 'officer_bookstore@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่ศูนย์หนังสือ มฉก.',
+    department: 'ศูนย์หนังสือ มฉก.',
+    departmentId: 'bookstore',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_teochew',
+    email: 'officer_teochew@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่ศูนย์แต้จิ๋ววิทยา',
+    department: 'ศูนย์แต้จิ๋ววิทยา',
+    departmentId: 'teochew',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_registrar',
+    email: 'officer_registrar@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่สำนักทะเบียนและประมวลผล',
+    department: 'สำนักทะเบียนและประมวลผล',
+    departmentId: 'registrar',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_student_affairs',
+    email: 'officer_student_affairs@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่สำนักพัฒนานักศึกษา',
+    department: 'สำนักพัฒนานักศึกษา',
+    departmentId: 'student_affairs',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+  {
+    username: 'officer_academic',
+    email: 'officer_academic@hcu.ac.th',
+    displayName: 'เจ้าหน้าที่สำนักพัฒนาวิชาการ',
+    department: 'สำนักพัฒนาวิชาการ',
+    departmentId: 'academic',
+    role: 'officer',
+    password: 'hcu1234',
+  },
+];
+
+module.exports = OFFICERS;

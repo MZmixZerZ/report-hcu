@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Background red rounded square -->
+  <rect x="0" y="0" width="64" height="64" rx="13" fill="#D61514"/>
+
+  <!-- Gold border -->
+  <rect x="1" y="1" width="62" height="62" rx="12.5" fill="none" stroke="#FFBD00" strokeWidth="2.5"/>
+
+  <!-- Inner frame (thin) -->
+  <rect x="5.5" y="5.5" width="53" height="53" rx="8.5" fill="none" stroke="#FFBD00" strokeWidth="0.8" opacity="0.4"/>
+
+  <!-- Corner diamonds -->
+  <polygon points="8,3.5 10.5,6 8,8.5 5.5,6" fill="#FFBD00" opacity="0.85"/>
+  <polygon points="56,3.5 58.5,6 56,8.5 53.5,6" fill="#FFBD00" opacity="0.85"/>
+  <polygon points="8,55.5 10.5,58 8,60.5 5.5,58" fill="#FFBD00" opacity="0.85"/>
+  <polygon points="56,55.5 58.5,58 56,60.5 53.5,58" fill="#FFBD00" opacity="0.85"/>
+
+  <!-- Document body -->
+  <rect x="12" y="9" width="26" height="30" rx="3" fill="white"/>
+  <!-- Folded corner top-right -->
+  <polygon points="34,9 38,13 34,13" fill="#FFCDD2"/>
+
+  <!-- Document lines -->
+  <rect x="15.5" y="17" width="12" height="2.2" rx="1.1" fill="#FFCDD2"/>
+  <rect x="15.5" y="21.5" width="15" height="2.2" rx="1.1" fill="#FFCDD2"/>
+  <rect x="15.5" y="26" width="9" height="2.2" rx="1.1" fill="#FFCDD2"/>
+  <rect x="15.5" y="30.5" width="13" height="2.2" rx="1.1" fill="#FFCDD2"/>
+
+  <!-- Gold seal circle -->
+  <circle cx="40" cy="36" r="11" fill="#FFBD00"/>
+  <circle cx="40" cy="36" r="9" fill="none" stroke="#D61514" strokeWidth="1.2"/>
+
+  <!-- Checkmark inside seal -->
+  <polyline points="34,36 38,40 46,30"
+    fill="none" stroke="#D61514" strokeWidth="2.8"
+    stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Divider line -->
+  <line x1="9" y1="47" x2="55" y2="47" stroke="#FFBD00" strokeWidth="0.8" opacity="0.5"/>
+
+  <!-- มฉก. text -->
+  <text x="32" y="57.5" text-anchor="middle"
+    fill="#FFBD00" font-size="8" font-weight="700"
+    letter-spacing="1.5"
+    font-family="system-ui, -apple-system, sans-serif">มฉก.</text>
+</svg>

@@ -1,0 +1,22 @@
+.App {
+  margin: 0;
+  padding: 0;
+  background: #f5f6f8;
+  min-height: 100vh;
+  font-family: 'Sarabun', 'Roboto', sans-serif;
+  scroll-behavior: smooth;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+}
+
+/* subtle transitions on cards and buttons already handled by MUI theme
+   but add a few global helpers */
+.MuiPaper-root, .MuiCard-root, .MuiButton-root {
+  transition: all 0.2s ease-in-out;
+}

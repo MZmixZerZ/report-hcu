@@ -1,0 +1,9 @@
+{
+  "name": "report-hcu",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm install --legacy-peer-deps && npm run build && cd ../server && npm install",
+    "start": "node server/server.js"
+  }
+}

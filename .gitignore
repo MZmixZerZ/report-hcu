@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Firebase service account keys — NEVER commit
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# React build output (Render builds this itself)
+client/build/
+
+# NLP model cache (ดาวน์โหลดอัตโนมัติตอน server start)
+server/.model-cache/
+
+# Logs
+server/server.log
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

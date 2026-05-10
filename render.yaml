@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: report-hcu
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      # กำหนดใน Render Dashboard → Environment:
+      # FIREBASE_SERVICE_ACCOUNT_JSON  = (วางเนื้อหา JSON ทั้งหมดของ service account key)
+      # FIREBASE_DATABASE_URL          = https://report-manager-b69ed-default-rtdb.firebaseio.com
