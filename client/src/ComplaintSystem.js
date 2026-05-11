@@ -204,7 +204,7 @@ function ComplaintSystem() {
                       ระบบจัดการข้อร้องเรียน
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 400, opacity: 0.95, color: '#fff', maxWidth: 560, mx: 'auto', lineHeight: 1.8 }}>
-                      นวัตกรรมการจัดการสารสนเทศ เพื่อยกระดับมาตรฐานการบริการและคุณภาพชีวิตภายในมหาวิทยาลัย
+                      ระบบกลางรับเรื่องร้องเรียนและแก้ไขปัญหา เพื่อพัฒนาคุณภาพบริการภายในมหาวิทยาลัย
                     </Typography>
                   </Box>
                 </CardContent>
