@@ -11,7 +11,7 @@
 | Service  | URL |
 |----------|-----|
 | Frontend | [report-hcu.vercel.app](https://report-hcu.vercel.app) |
-| Backend API | [/api/status](https://report-hcu-api.up.railway.app/api/status) |
+| Backend API | [report-hcu-api-production.up.railway.app](https://report-hcu-api-production.up.railway.app/api/status) |
 
 > เข้าใช้งานด้วยอีเมล @hcu.ac.th
 
