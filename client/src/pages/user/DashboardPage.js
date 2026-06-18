@@ -41,7 +41,7 @@ function DashboardPage() {
         setLoading(true);
         setError('');
         const response = await api.get('/complaints');
-        setComplaints(response.data || []);
+        setComplaints(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error('Error fetching complaints:', err);
         setError('ไม่สามารถโหลดข้อมูลคำร้องเรียน');

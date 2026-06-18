@@ -35,7 +35,7 @@ function CheckStatusPage({ onBack, initialComplaintId }) {
       console.log('Fetching complaints for user:', user?.uid);
       const response = await api.get('/complaints');
       console.log('Complaints response:', response.data);
-      setComplaints(response.data || []);
+      setComplaints(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Fetch complaints failed:', {
         message: err.message,
