@@ -27,14 +27,22 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:5173',
-      'http://localhost:5000',
-      'https://report-hcu.com',
-      'https://www.report-hcu.com',
-    ],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const normalized = origin.replace(/\/$/, '');
+      if (
+        normalized === 'http://localhost:3000' ||
+        normalized === 'http://localhost:3001' ||
+        normalized === 'http://localhost:5173' ||
+        normalized === 'http://localhost:5000' ||
+        normalized.endsWith('.vercel.app') ||
+        normalized.endsWith('.up.railway.app') ||
+        normalized === 'https://report-hcu.com' ||
+        normalized === 'https://www.report-hcu.com' ||
+        (process.env.ALLOWED_ORIGIN && normalized === process.env.ALLOWED_ORIGIN)
+      ) return callback(null, true);
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true,
   },
 });

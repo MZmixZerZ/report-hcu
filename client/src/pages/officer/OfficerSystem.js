@@ -69,7 +69,7 @@ function OfficerSystem({ initialMode = 'dashboard' }) {
     try {
       setLoading(true);
       const res = await api.get('/complaints');
-      setComplaints(res.data);
+      setComplaints(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('fetch complaints error', err);
     } finally {

@@ -203,8 +203,9 @@ function AdminSystem({ onBack }) {
   const loadTypes = async () => {
     try {
       const res = await api.get('/admin/complaint-types');
-      setTypes(res.data);
-      setStats(prev => ({ ...prev, totalTypes: res.data.length }));
+      const typesData = Array.isArray(res.data) ? res.data : [];
+      setTypes(typesData);
+      setStats(prev => ({ ...prev, totalTypes: typesData.length }));
     } catch (err) {
       console.error('Error loading types:', err);
     }
@@ -213,7 +214,7 @@ function AdminSystem({ onBack }) {
   const loadFaculties = async () => {
     try {
       const res = await api.get('/admin/faculties');
-      setFaculties(res.data);
+      setFaculties(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error loading faculties:', err);
     }
@@ -223,7 +224,7 @@ function AdminSystem({ onBack }) {
     try {
       setDeptLoading(true);
       const res = await api.get('/admin/departments');
-      setDepartments(res.data);
+      setDepartments(Array.isArray(res.data) ? res.data : []);
     } catch (err) { console.error('Error loading departments:', err); }
     finally { setDeptLoading(false); }
   };
@@ -239,7 +240,7 @@ function AdminSystem({ onBack }) {
     try {
       setPendingLoading(true);
       const res = await api.get('/admin/custom-issue-requests');
-      setPendingIssues(res.data);
+      setPendingIssues(Array.isArray(res.data) ? res.data : []);
     } catch (err) { console.error('Error loading pending issues:', err); }
     finally { setPendingLoading(false); }
   };
@@ -333,7 +334,7 @@ function AdminSystem({ onBack }) {
     try {
       setLoading(true);
       const res = await api.get(`/admin/complaint-types/${selectedType}/issues`);
-      setIssues(res.data);
+      setIssues(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error loading issues:', err);
       setIssues([]);
