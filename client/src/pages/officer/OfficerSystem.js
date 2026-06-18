@@ -683,7 +683,7 @@ function OfficerSystem({ initialMode = 'dashboard' }) {
 
                 {selected.feedback?.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>💬 ประวัติการสื่อสาร</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>ประวัติการสื่อสาร</Typography>
                     {selected.feedback.map((fb, idx) => (
                       <Box key={idx} sx={{ bgcolor: '#F9FAFB', borderRadius: 2, p: 1.5, mb: 1, borderLeft: '3px solid #5E72E4' }}>
                         <Typography variant="caption" sx={{ color: '#6B7280' }}>
@@ -698,7 +698,7 @@ function OfficerSystem({ initialMode = 'dashboard' }) {
 
                 {selected.activityLog?.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>📋 บันทึกกิจกรรม</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>บันทึกกิจกรรม</Typography>
                     {selected.activityLog.map((log, idx) => (
                       <Box key={idx} sx={{ display: 'flex', gap: 1.5, mb: 0.75, alignItems: 'flex-start' }}>
                         <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: STATUS_CONFIG.find(s => s.status === log.toStatus)?.color || '#9CA3AF', mt: 0.7, flexShrink: 0 }} />
@@ -753,7 +753,7 @@ function OfficerSystem({ initialMode = 'dashboard' }) {
                 )}
 
                 {selected.status === 'completed' && (
-                  <Alert severity="success">✅ ดำเนินการเสร็จสิ้นแล้ว</Alert>
+                  <Alert severity="success">ดำเนินการเสร็จสิ้นแล้ว</Alert>
                 )}
 
                 {/* Review Card */}
@@ -761,7 +761,7 @@ function OfficerSystem({ initialMode = 'dashboard' }) {
                   <Box>
                     <Divider sx={{ my: 1 }} />
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      ⭐ รีวิวจากผู้แจ้
+                      รีวิวจากผู้แจ้ง
                     </Typography>
                     {selected.review ? (
                       <Box sx={{
@@ -795,7 +795,7 @@ function OfficerSystem({ initialMode = 'dashboard' }) {
                       </Box>
                     ) : (
                       <Box sx={{ bgcolor: '#F9FAFB', border: '1px dashed #D1D5DB', borderRadius: '12px', p: 2, textAlign: 'center' }}>
-                        <Typography variant="body2" sx={{ color: '#9CA3AF' }}>ผู้แจ้ยังไม่ได้ส่งรีวิว</Typography>
+                        <Typography variant="body2" sx={{ color: '#9CA3AF' }}>ผู้แจ้งยังไม่ได้ส่งรีวิว</Typography>
                       </Box>
                     )}
                   </Box>

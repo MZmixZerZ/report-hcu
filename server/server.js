@@ -73,7 +73,13 @@ app.use(cors({
     if (!origin) return callback(null, true);
     // normalize trailing slash before comparing
     const normalized = origin.replace(/\/$/, '');
-    if (allowedOrigins.includes(normalized)) return callback(null, true);
+    // allow any Vercel deployment (preview + production) and Railway
+    if (
+      allowedOrigins.includes(normalized) ||
+      normalized.endsWith('.vercel.app') ||
+      normalized.endsWith('.up.railway.app') ||
+      (process.env.ALLOWED_ORIGIN && normalized === process.env.ALLOWED_ORIGIN)
+    ) return callback(null, true);
     callback(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,
@@ -97,13 +103,23 @@ app.use('/api/complaints', complaintsRouter); // /api/complaints/*
 app.use('/api/admin', adminRouter);           // /api/admin/*
 app.use('/api/departments', departmentsRouter); // /api/departments/*
 
-// ─── Serve React build (production) ──────────────────────────────────────────
+// ─── Serve React build (production — only when built together) ───────────────
+const fs = require('fs');
 const buildPath = path.join(__dirname, '..', 'client', 'build');
-app.use(express.static(buildPath));
-// React Router catch-all — ทุก path ที่ไม่ใช่ /api ส่งกลับ index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(buildPath, 'index.html'));
-});
+if (fs.existsSync(path.join(buildPath, 'index.html'))) {
+  app.use(express.static(buildPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+} else {
+  // standalone API mode (Vercel + Railway split deploy)
+  app.get('/', (req, res) => {
+    res.json({ service: 'Report HCU API', status: 'running', version: '1.0.0' });
+  });
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Not found. This is an API server.' });
+  });
+}
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 // ดักจับ error ที่ไม่ได้ handle ใน route ใดๆ

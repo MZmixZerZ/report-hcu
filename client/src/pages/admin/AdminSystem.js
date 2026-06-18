@@ -349,6 +349,13 @@ function AdminSystem({ onBack }) {
   }, [selectedType, loadIssues]);
 
   // User Management
+  const handleAddUser = () => {
+    setEditingUser(null);
+    setFormData({ email: '', displayName: '', role: 'user', userType: 'student', department: '', major: '' });
+    setFormErrors({});
+    setOpenUserDialog(true);
+  };
+
   const handleEditUser = (user) => {
     setEditingUser(user);
     setFormData({
@@ -365,6 +372,7 @@ function AdminSystem({ onBack }) {
 
   const validateUserForm = () => {
     const errors = {};
+    if (!editingUser && !formData.email) errors.email = 'Email is required';
     if (!formData.displayName) errors.displayName = 'Display name is required';
     if (!formData.role) errors.role = 'Role is required';
     return errors;
@@ -379,13 +387,24 @@ function AdminSystem({ onBack }) {
 
     try {
       setLoading(true);
-      await api.put(`/admin/users/${editingUser.id}`, {
-        displayName: formData.displayName,
-        role: formData.role,
-        userType: formData.userType,
-        department: formData.department,
-        major: formData.major,
-      });
+      if (editingUser) {
+        await api.put(`/admin/users/${editingUser.id}`, {
+          displayName: formData.displayName,
+          role: formData.role,
+          userType: formData.userType,
+          department: formData.department,
+          major: formData.major,
+        });
+      } else {
+        await api.post('/admin/users', {
+          email: formData.email,
+          displayName: formData.displayName,
+          role: formData.role,
+          userType: formData.userType,
+          department: formData.department,
+          major: formData.major,
+        });
+      }
       setOpenUserDialog(false);
     } catch (err) {
       setFormErrors({ submit: err.response?.data?.error || 'Failed to save user' });
@@ -730,6 +749,17 @@ function AdminSystem({ onBack }) {
         {/* Users Tab */}
         <TabPanel value={tabIndex} index={1}>
           <Box sx={{ mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>จัดการผู้ใช้</Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddUser}
+                sx={{ background: 'linear-gradient(135deg, #D61514 0%, #AA020B 100%)' }}
+              >
+                เพิ่มผู้ใช้
+              </Button>
+            </Box>
             {/* Role toggle */}
             <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
               {[
@@ -1262,17 +1292,20 @@ function AdminSystem({ onBack }) {
         </DialogActions>
       </Dialog>
 
-      {/* User Dialog - Edit Only */}
+      {/* User Dialog - Create / Edit */}
       <Dialog open={openUserDialog} onClose={() => setOpenUserDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, bgcolor: '#E8ECFF', color: '#D61514' }}>
-          แก้ไขข้อมูลผู้ใช้
+          {editingUser ? 'แก้ไขข้อมูลผู้ใช้' : 'เพิ่มผู้ใช้ใหม่'}
         </DialogTitle>
         <DialogContent sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
           {formErrors.submit && <Alert severity="error">{formErrors.submit}</Alert>}
           <TextField
             label="Email"
             value={formData.email}
-            disabled
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            disabled={Boolean(editingUser)}
+            error={Boolean(formErrors.email)}
+            helperText={formErrors.email}
             fullWidth
           />
           <TextField

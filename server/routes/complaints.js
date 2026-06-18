@@ -471,8 +471,16 @@ router.get('/:id', verifyToken, async (req, res) => {
       if (!officerDept || complaint.assignedDepartment !== officerDept) {
         return res.status(403).json({ error: 'Unauthorized: complaint not in your department' });
       }
-    } else if (complaint.userId !== req.userId && userRole !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized' });
+    } else if (complaint.userId !== req.userId && userRole !== 'admin' && userRole !== 'executive') {
+      if (userRole === 'faculty') {
+        // Faculty can only view complaints from their own faculty
+        const userFaculty = userSnap.data()?.faculty || userSnap.data()?.department || '';
+        if (!userFaculty || complaint.faculty !== userFaculty) {
+          return res.status(403).json({ error: 'Unauthorized' });
+        }
+      } else {
+        return res.status(403).json({ error: 'Unauthorized' });
+      }
     }
 
     const createdAt = complaint.createdAt?.toDate ? complaint.createdAt.toDate().toISOString() : complaint.createdAt;
@@ -484,10 +492,17 @@ router.get('/:id', verifyToken, async (req, res) => {
       createdAt: fb.createdAt?.toDate ? fb.createdAt.toDate().toISOString() : fb.createdAt,
     })) || [];
 
+    // Convert activityLog timestamps
+    const activityLog = complaint.activityLog?.map(entry => ({
+      ...entry,
+      at: entry.at?.toDate ? entry.at.toDate().toISOString() : entry.at,
+    })) || [];
+
     const responsePayload = {
       id: req.params.id,
       ...complaint,
       feedback,
+      activityLog,
       createdAt,
       updatedAt,
     };
@@ -933,6 +948,14 @@ router.delete('/:id', verifyToken, async (req, res) => {
 
     if (complaint.userId !== req.userId && userRole !== 'admin' && userRole !== 'officer') {
       return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Officers can only delete complaints assigned to their department
+    if (userRole === 'officer') {
+      const officerDept = userSnap.data()?.department || '';
+      if (!officerDept || complaint.assignedDepartment !== officerDept) {
+        return res.status(403).json({ error: 'Unauthorized: complaint not in your department' });
+      }
     }
 
     await complaintRef.delete();
