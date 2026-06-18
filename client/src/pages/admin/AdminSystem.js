@@ -183,6 +183,10 @@ function AdminSystem({ onBack }) {
   const [newKeyword, setNewKeyword] = useState('');
   const [newDeptName, setNewDeptName] = useState('');
   const [newDeptDesc, setNewDeptDesc] = useState('');
+  const [editingDept, setEditingDept] = useState(null);
+  const [openDeptDialog, setOpenDeptDialog] = useState(false);
+  const [deptEditName, setDeptEditName] = useState('');
+  const [deptEditDesc, setDeptEditDesc] = useState('');
 
   // Pending custom issue requests
   const [pendingIssues, setPendingIssues] = useState([]);
@@ -295,6 +299,26 @@ function AdminSystem({ onBack }) {
       setDepartments(prev => [...prev, res.data]);
       setNewDeptName(''); setNewDeptDesc('');
     } catch (e) { console.error(e); }
+  };
+
+  const handleEditDept = (dept) => {
+    setEditingDept(dept);
+    setDeptEditName(dept.name);
+    setDeptEditDesc(dept.description || '');
+    setOpenDeptDialog(true);
+  };
+
+  const handleSaveDept = async () => {
+    if (!deptEditName.trim()) return;
+    try {
+      setLoading(true);
+      await api.put(`/admin/departments/${editingDept.id}`, { name: deptEditName.trim(), description: deptEditDesc.trim() });
+      setDepartments(prev => prev.map(d =>
+        d.id === editingDept.id ? { ...d, name: deptEditName.trim(), description: deptEditDesc.trim() } : d
+      ));
+      setOpenDeptDialog(false);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
   const handleDeleteDept = async (id) => {
@@ -1138,6 +1162,9 @@ function AdminSystem({ onBack }) {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Chip label={`${(dept.keywords || []).length} คำ`} size="small" sx={{ bgcolor: '#E8ECFF', color: '#555' }} />
+                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleEditDept(dept); }} sx={{ color: '#D61514' }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
                     <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDeleteDept(dept.id); }} sx={{ color: '#E74C3C' }}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -1517,6 +1544,34 @@ function AdminSystem({ onBack }) {
           <Button onClick={() => setOpenFacultyDialog(false)} color="inherit">Cancel</Button>
           <Button onClick={handleSaveFaculty} variant="contained" sx={{ background: 'linear-gradient(135deg, #D61514 0%, #AA020B 100%)' }} disabled={loading}>
             {loading ? <CircularProgress size={24} /> : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Department Edit Dialog */}
+      <Dialog open={openDeptDialog} onClose={() => setOpenDeptDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, bgcolor: '#E8ECFF', color: '#D61514' }}>แก้ไขหน่วยงาน</DialogTitle>
+        <DialogContent sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            fullWidth
+            autoFocus
+            label="ชื่อหน่วยงาน"
+            value={deptEditName}
+            onChange={(e) => setDeptEditName(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            label="คำอธิบาย (ไม่บังคับ)"
+            value={deptEditDesc}
+            onChange={(e) => setDeptEditDesc(e.target.value)}
+            multiline
+            rows={2}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={() => setOpenDeptDialog(false)} color="inherit">ยกเลิก</Button>
+          <Button onClick={handleSaveDept} variant="contained" sx={{ background: 'linear-gradient(135deg, #D61514 0%, #AA020B 100%)' }} disabled={loading || !deptEditName.trim()}>
+            {loading ? <CircularProgress size={24} /> : 'บันทึก'}
           </Button>
         </DialogActions>
       </Dialog>

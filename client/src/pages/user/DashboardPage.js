@@ -5,7 +5,9 @@ import Footer from '../../components/Footer';
 import {
   Box, Container, Typography, Card, Grid, Chip, CircularProgress,
   Alert, LinearProgress, Collapse, Divider,
-  Table, TableBody, TableCell, TableHead, TableRow,
+  Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TablePagination,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  IconButton, TextField, InputAdornment, Button, Tooltip,
 } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -16,6 +18,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import SchoolIcon from '@mui/icons-material/School';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 function DashboardPage() {
   const { userRole, userFaculty } = useAuth();
@@ -23,6 +28,11 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedTopic, setExpandedTopic] = useState(null);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [listSearch, setListSearch] = useState('');
+  const [listStatusFilter, setListStatusFilter] = useState('all');
+  const [listPage, setListPage] = useState(0);
+  const LIST_PAGE_SIZE = 8;
 
   useEffect(() => {
     if (!userRole) return;
@@ -108,6 +118,27 @@ function DashboardPage() {
     ).sort((a, b) => b[1] - a[1]);
 
   const maxTopic = topicRank[0]?.[1] || 1;
+
+  const STATUS_MAP = {
+    pending:     { label: 'รับเรื่องแล้ว',      color: '#6B7280', bg: '#F3F4F6' },
+    in_progress: { label: 'กำลังดำเนินการ',     color: '#F59E0B', bg: '#FFFBEB' },
+    completed:   { label: 'ดำเนินการเสร็จสิ้น', color: '#10B981', bg: '#ECFDF5' },
+  };
+  const URGENCY_COLOR = { ฉุกเฉิน: '#EF4444', สูง: '#F59E0B', ปานกลาง: '#3B82F6', ต่ำ: '#10B981' };
+
+  const filteredComplaints = complaints
+    .filter(c => {
+      const q = listSearch.toLowerCase();
+      const matchSearch = !q ||
+        (c.topic || '').toLowerCase().includes(q) ||
+        (c.issue || '').toLowerCase().includes(q) ||
+        (c.description || '').toLowerCase().includes(q) ||
+        (c.faculty || '').toLowerCase().includes(q) ||
+        (c.id || '').toLowerCase().includes(q);
+      const matchStatus = listStatusFilter === 'all' || c.status === listStatusFilter;
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const maxIssue = issueRank[0]?.[1] || 1;
 
   const role = (userRole || '').trim();
@@ -574,7 +605,300 @@ function DashboardPage() {
           </Grid>
         )}
 
+        {/* ── Complaint List (faculty / executive only) ── */}
+        {isAdvanced && (
+          <Card sx={{ borderRadius: '12px', p: 2.5, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              <Typography fontWeight={800} fontSize="0.95rem" color="#D61514">
+                รายการคำร้องเรียน ({filteredComplaints.length} เรื่อง)
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                {[
+                  { key: 'all', label: 'ทั้งหมด' },
+                  { key: 'pending', label: 'รับเรื่องแล้ว' },
+                  { key: 'in_progress', label: 'กำลังดำเนินการ' },
+                  { key: 'completed', label: 'เสร็จสิ้น' },
+                ].map(({ key, label }) => (
+                  <Chip
+                    key={key}
+                    label={label}
+                    size="small"
+                    onClick={() => { setListStatusFilter(key); setListPage(0); }}
+                    sx={{
+                      cursor: 'pointer', fontWeight: 700, fontSize: '0.75rem',
+                      bgcolor: listStatusFilter === key
+                        ? (key === 'all' ? '#D61514' : STATUS_MAP[key]?.color)
+                        : '#F3F4F6',
+                      color: listStatusFilter === key ? '#fff' : '#555',
+                      '&:hover': { opacity: 0.85 },
+                    }}
+                  />
+                ))}
+                <TextField
+                  size="small"
+                  placeholder="ค้นหา..."
+                  value={listSearch}
+                  onChange={(e) => { setListSearch(e.target.value); setListPage(0); }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ fontSize: '1rem', color: '#9CA3AF' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ width: 180, '& .MuiInputBase-root': { borderRadius: '8px', fontSize: '0.85rem' } }}
+                />
+              </Box>
+            </Box>
+
+            {filteredComplaints.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography color="#bbb" fontSize="0.9rem">ไม่พบคำร้องเรียน</Typography>
+              </Box>
+            ) : (
+              <>
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: '#F9FAFB' }}>
+                        <TableCell sx={{ fontWeight: 700, color: '#374151', fontSize: '0.78rem', width: 90 }}>วันที่</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#374151', fontSize: '0.78rem' }}>หัวข้อ / ปัญหา</TableCell>
+                        {role === 'executive' && (
+                          <TableCell sx={{ fontWeight: 700, color: '#374151', fontSize: '0.78rem', width: 130 }}>คณะ</TableCell>
+                        )}
+                        <TableCell sx={{ fontWeight: 700, color: '#374151', fontSize: '0.78rem', width: 140 }}>หน่วยงาน</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#374151', fontSize: '0.78rem', width: 120 }} align="center">สถานะ</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#374151', fontSize: '0.78rem', width: 90 }} align="center">ความเร่งด่วน</TableCell>
+                        <TableCell sx={{ width: 44 }} />
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredComplaints
+                        .slice(listPage * LIST_PAGE_SIZE, (listPage + 1) * LIST_PAGE_SIZE)
+                        .map((c) => {
+                          const st = STATUS_MAP[c.status] || { label: c.status, color: '#9CA3AF', bg: '#F3F4F6' };
+                          const uc = URGENCY_COLOR[c.urgency] || '#9CA3AF';
+                          return (
+                            <TableRow
+                              key={c.id}
+                              hover
+                              onClick={() => setSelectedComplaint(c)}
+                              sx={{ cursor: 'pointer', '&:last-child td': { border: 0 } }}
+                            >
+                              <TableCell sx={{ fontSize: '0.78rem', color: '#6B7280', whiteSpace: 'nowrap' }}>
+                                {c.createdAt ? new Date(c.createdAt).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: '2-digit' }) : '-'}
+                              </TableCell>
+                              <TableCell sx={{ maxWidth: 200 }}>
+                                <Typography fontSize="0.84rem" fontWeight={600} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {c.topic || '—'}
+                                </Typography>
+                                <Typography fontSize="0.75rem" color="#9CA3AF" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {c.issue || ''}
+                                </Typography>
+                              </TableCell>
+                              {role === 'executive' && (
+                                <TableCell sx={{ fontSize: '0.8rem', color: '#555', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {c.faculty || '—'}
+                                </TableCell>
+                              )}
+                              <TableCell sx={{ fontSize: '0.8rem', color: '#555', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {c.assignedDepartment || '—'}
+                              </TableCell>
+                              <TableCell align="center">
+                                <Chip label={st.label} size="small"
+                                  sx={{ bgcolor: st.bg, color: st.color, fontWeight: 700, fontSize: '0.7rem', height: 22 }} />
+                              </TableCell>
+                              <TableCell align="center">
+                                <Chip label={c.urgency || '—'} size="small"
+                                  sx={{ bgcolor: uc + '22', color: uc, fontWeight: 700, fontSize: '0.7rem', height: 22 }} />
+                              </TableCell>
+                              <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                                <Tooltip title="ดูรายละเอียด">
+                                  <IconButton size="small" sx={{ color: '#D61514' }} onClick={() => setSelectedComplaint(c)}>
+                                    <VisibilityIcon sx={{ fontSize: '1rem' }} />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={filteredComplaints.length}
+                  page={listPage}
+                  onPageChange={(_, p) => setListPage(p)}
+                  rowsPerPage={LIST_PAGE_SIZE}
+                  rowsPerPageOptions={[]}
+                  labelDisplayedRows={({ from, to, count }) => `${from}–${to} จาก ${count} เรื่อง`}
+                  sx={{ borderTop: '1px solid #F3F4F6', mt: 0.5 }}
+                />
+              </>
+            )}
+          </Card>
+        )}
+
       </Container>
+
+      {/* ── Complaint Detail Dialog ── */}
+      <Dialog
+        open={Boolean(selectedComplaint)}
+        onClose={() => setSelectedComplaint(null)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '16px', maxHeight: '90vh' } }}
+      >
+        {selectedComplaint && (() => {
+          const c = selectedComplaint;
+          const st = STATUS_MAP[c.status] || { label: c.status, color: '#9CA3AF', bg: '#F3F4F6' };
+          const uc = URGENCY_COLOR[c.urgency] || '#9CA3AF';
+          return (
+            <>
+              <DialogTitle sx={{ pb: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, pr: 4 }}>
+                  <Box>
+                    <Typography fontWeight={800} fontSize="1rem" color="#D61514">รายละเอียดคำร้องเรียน</Typography>
+                    <Typography fontSize="0.73rem" color="#9CA3AF" sx={{ mt: 0.3 }}>
+                      ID: {c.id} &nbsp;·&nbsp;
+                      {c.createdAt ? new Date(c.createdAt).toLocaleString('th-TH') : ''}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <Chip label={st.label} size="small" sx={{ bgcolor: st.bg, color: st.color, fontWeight: 700 }} />
+                    <Chip label={c.urgency || '—'} size="small" sx={{ bgcolor: uc + '22', color: uc, fontWeight: 700 }} />
+                  </Box>
+                </Box>
+                <IconButton
+                  onClick={() => setSelectedComplaint(null)}
+                  sx={{ position: 'absolute', top: 10, right: 10, color: '#9CA3AF' }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </DialogTitle>
+
+              <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                {/* Info grid */}
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
+                  {[
+                    { label: 'หัวข้อ', value: c.topic },
+                    { label: 'ปัญหา', value: c.issue },
+                    { label: 'คณะ / หน่วยงานผู้แจ้ง', value: c.faculty },
+                    { label: 'สถานที่', value: c.location },
+                  ].map(({ label, value }) => (
+                    <Box key={label} sx={{ bgcolor: '#F9FAFB', borderRadius: '8px', px: 1.5, py: 1 }}>
+                      <Typography fontSize="0.72rem" color="#9CA3AF" fontWeight={600}>{label}</Typography>
+                      <Typography fontSize="0.88rem" fontWeight={600} color="#1F2937">{value || '—'}</Typography>
+                    </Box>
+                  ))}
+                  <Box sx={{ bgcolor: '#EFF6FF', borderRadius: '8px', px: 1.5, py: 1, gridColumn: { sm: '1 / -1' } }}>
+                    <Typography fontSize="0.72rem" color="#3B82F6" fontWeight={600}>หน่วยงานที่รับผิดชอบ</Typography>
+                    <Typography fontSize="0.88rem" fontWeight={700} color={c.assignedDepartment ? '#1D4ED8' : '#9CA3AF'}>
+                      {c.assignedDepartment || '— ไม่พบหน่วยงานที่รับผิดชอบ —'}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Description */}
+                {c.description && (
+                  <Box>
+                    <Typography fontSize="0.78rem" color="#9CA3AF" fontWeight={600} sx={{ mb: 0.5 }}>รายละเอียด</Typography>
+                    <Typography fontSize="0.9rem" color="#374151"
+                      sx={{ whiteSpace: 'pre-wrap', bgcolor: '#F9FAFB', borderRadius: '8px', px: 1.5, py: 1 }}>
+                      {c.description}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Image */}
+                {c.imageBase64 && (
+                  <Box>
+                    <Typography fontSize="0.78rem" color="#9CA3AF" fontWeight={600} sx={{ mb: 0.75 }}>รูปภาพที่แนบมา</Typography>
+                    <Box sx={{ border: '2px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', bgcolor: '#F9FAFB', p: 1, textAlign: 'center' }}>
+                      <Box
+                        component="img"
+                        src={c.imageBase64}
+                        alt="รูปแนบ"
+                        sx={{ maxWidth: '100%', maxHeight: 320, objectFit: 'contain', borderRadius: '8px', cursor: 'pointer' }}
+                        onClick={() => window.open(c.imageBase64, '_blank')}
+                      />
+                      <Typography fontSize="0.72rem" color="#9CA3AF" mt={0.5}>คลิกเพื่อดูขนาดเต็ม</Typography>
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Communication history */}
+                {c.feedback?.length > 0 && (
+                  <Box>
+                    <Typography fontSize="0.78rem" color="#9CA3AF" fontWeight={600} sx={{ mb: 1 }}>ประวัติการสื่อสาร</Typography>
+                    {c.feedback.map((fb, i) => (
+                      <Box key={i} sx={{ bgcolor: '#F9FAFB', borderRadius: '8px', p: 1.5, mb: 1, borderLeft: '3px solid #5E72E4' }}>
+                        <Typography fontSize="0.72rem" color="#6B7280">
+                          {new Date(fb.createdAt).toLocaleString('th-TH')} — {fb.from}
+                        </Typography>
+                        <Typography fontSize="0.88rem" sx={{ mt: 0.5 }}>{fb.message}</Typography>
+                        {fb.proofImage && (
+                          <Box component="img" src={fb.proofImage} alt="proof"
+                            sx={{ maxWidth: '100%', maxHeight: 180, mt: 1, borderRadius: '6px' }} />
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+
+                {/* Activity log timeline */}
+                {c.activityLog?.length > 0 && (
+                  <Box>
+                    <Typography fontSize="0.78rem" color="#9CA3AF" fontWeight={600} sx={{ mb: 1.5 }}>บันทึกกิจกรรม</Typography>
+                    <Box sx={{ position: 'relative', pl: 2.5 }}>
+                      <Box sx={{ position: 'absolute', left: 8, top: 8, bottom: 8, width: 2, bgcolor: '#E5E7EB', borderRadius: 1 }} />
+                      {c.activityLog.map((log, i) => {
+                        const logColor = STATUS_MAP[log.toStatus]?.color || '#9CA3AF';
+                        return (
+                          <Box key={i} sx={{ display: 'flex', gap: 1.5, mb: 2, alignItems: 'flex-start', position: 'relative' }}>
+                            <Box sx={{
+                              width: 16, height: 16, borderRadius: '50%', bgcolor: logColor,
+                              border: '2px solid #fff', boxShadow: `0 0 0 2px ${logColor}55`,
+                              flexShrink: 0, mt: 0.1,
+                            }} />
+                            <Box>
+                              <Typography fontSize="0.84rem" fontWeight={700} color="#1F2937">
+                                {STATUS_MAP[log.toStatus]?.label || log.toStatus}
+                                {log.officerName && (
+                                  <Box component="span" sx={{ color: '#6B7280', fontWeight: 400, fontSize: '0.8rem' }}> — {log.officerName}</Box>
+                                )}
+                              </Typography>
+                              <Typography fontSize="0.72rem" color="#9CA3AF">
+                                {log.at ? new Date(log.at).toLocaleString('th-TH') : ''}
+                              </Typography>
+                              {log.note && (
+                                <Typography fontSize="0.82rem" color="#374151"
+                                  sx={{ mt: 0.4, bgcolor: '#F3F4F6', borderRadius: '6px', px: 1, py: 0.5, display: 'inline-block' }}>
+                                  {log.note}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                )}
+              </DialogContent>
+
+              <DialogActions sx={{ px: 3, py: 1.5 }}>
+                <Button onClick={() => setSelectedComplaint(null)}
+                  variant="outlined"
+                  sx={{ borderColor: '#D61514', color: '#D61514', '&:hover': { bgcolor: '#FEF2F2' } }}>
+                  ปิด
+                </Button>
+              </DialogActions>
+            </>
+          );
+        })()}
+      </Dialog>
+
       <Footer />
     </Box>
   );

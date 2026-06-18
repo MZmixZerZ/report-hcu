@@ -12,7 +12,10 @@ const SocketContext = createContext(null);
 
 export const useSocket = () => useContext(SocketContext);
 
-const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// ถ้า REACT_APP_API_URL ว่าง = same-origin (production บน server เดียว)
+// ถ้า dev = ต้องระบุ port 5000 ตรงๆ เพราะ React dev server อยู่ port 3000
+const SOCKET_URL = process.env.REACT_APP_API_URL ||
+  (process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : undefined);
 
 export function SocketProvider({ children }) {
   const { user, userRole } = useAuth();
