@@ -5,10 +5,8 @@
 
 const express = require('express');
 const cors = require('cors');
-const http = require('http');
 const path = require('path');
-const { Server } = require('socket.io');
-require('dotenv').config(); // โหลดค่าจาก .env (port, Firebase key path ฯลฯ)
+require('dotenv').config();
 
 // เริ่มต้น Firebase Admin SDK (Firestore + Auth)
 const { db, auth } = require('./config/firebase');
@@ -24,45 +22,6 @@ const adminRouter = require('./routes/admin');           // เส้นทา�
 const departmentsRouter = require('./routes/departments'); // เส้นทางสำหรับหน่วยงาน
 
 const app = express();
-const httpServer = http.createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      const normalized = origin.replace(/\/$/, '');
-      if (
-        normalized === 'http://localhost:3000' ||
-        normalized === 'http://localhost:3001' ||
-        normalized === 'http://localhost:5173' ||
-        normalized === 'http://localhost:5000' ||
-        normalized.endsWith('.vercel.app') ||
-        normalized.endsWith('.up.railway.app') ||
-        normalized === 'https://report-hcu.com' ||
-        normalized === 'https://www.report-hcu.com' ||
-        (process.env.ALLOWED_ORIGIN && normalized === process.env.ALLOWED_ORIGIN)
-      ) return callback(null, true);
-      callback(new Error(`CORS blocked: ${origin}`));
-    },
-    credentials: true,
-  },
-});
-
-// ─── Socket.IO — real-time events ────────────────────────────────────────────
-io.on('connection', (socket) => {
-  // Client joins a room for their own userId to receive personal updates
-  socket.on('join', (userId) => {
-    if (userId && typeof userId === 'string') socket.join(userId);
-  });
-  // Clients join a role-based room: 'role:officer', 'role:admin' etc.
-  // Client sends: socket.emit('join_department', 'role:officer')
-  // We join the room as-is (no prefix) so it matches what complaints.js emits to
-  socket.on('join_department', (room) => {
-    if (room && typeof room === 'string') socket.join(room);
-  });
-});
-
-// Make io accessible in route handlers via req.app.get('io')
-app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
 
@@ -136,8 +95,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-httpServer.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📁 Firestore connected`);
-  console.log(`🔌 Socket.IO ready`);
 });

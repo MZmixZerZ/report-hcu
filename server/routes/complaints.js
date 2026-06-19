@@ -17,7 +17,6 @@ const { db, auth, admin } = require('../config/firebase');
 const { routeComplaintFromDB } = require('../utils/departmentRouter');
 const { createNotification } = require('../utils/notificationHelper');
 const { embed, cosine } = require('../utils/embedder');
-const { recordMemoryHit, queryMemoryBoost, queryMemoryBoostByType, tokenizeForMemory } = require('../utils/routingMemory'); // ระบบความจำ v2
 const router = express.Router();
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -172,34 +171,6 @@ router.post('/autofill', async (req, res) => {
       return res.json({ suggestions: [] });
     }
 
-    // ── ผสาน Memory Boost เข้า type score (v2: gram tokens + type-level) ────────
-    // ใช้ 4-gram ของภาษาไทยแทนการ split ด้วย whitespace
-    // ทำให้ "อาจารย์ด่า" match memory ของ "อาจารย์ปฏิบัติ" ได้ (gram ซ้ำกัน)
-    const memTokensAF = tokenizeForMemory(text);
-    const [memBoostsDept, memBoostsType] = await Promise.all([
-      queryMemoryBoost(db, memTokensAF),           // dept-level (broad, ×0.4)
-      queryMemoryBoostByType(db, memTokensAF),     // type-level (precise, ×1.0)
-    ]);
-
-    const hasMem = Object.keys(memBoostsDept).length > 0 || Object.keys(memBoostsType).length > 0;
-    if (hasMem) {
-      typeScores.forEach(t => {
-        const deptName = deptIdToName[t.type.departmentId] || t.type.departmentName || '';
-        // Dept-level: กว้าง — ลด weight เพื่อป้องกัน false boost type อื่นในกรมเดียวกัน
-        const deptBoost = (deptName && memBoostsDept[deptName]) ? memBoostsDept[deptName] * 0.4 : 0;
-        // Type-level: เจาะจง — full weight เฉพาะ type ที่เคยถูกเลือกจริงๆ
-        const typeBoost = memBoostsType[t.type.label] || 0;
-        const totalBoost = deptBoost + typeBoost;
-        if (totalBoost > 0) {
-          t.score += totalBoost;
-          t.memoryBoost = totalBoost;
-          console.log(`  [memory] "${t.type.label}" dept="${deptName}" boost=+${totalBoost.toFixed(2)} (dept:${deptBoost.toFixed(2)} type:${typeBoost.toFixed(2)})`);
-        }
-      });
-      // เรียงใหม่หลังผสาน memory boost
-      typeScores.sort((a, b) => b.score - a.score);
-    }
-    // ────────────────────────────────────────────────────────────────────────
 
     // ── ISSUE SCORING ─────────────────────────────────────────────────────────
     // For each top-3 type, score its issues using:
@@ -584,19 +555,6 @@ router.post('/', verifyToken, async (req, res) => {
         // Admin does NOT receive new_complaint notifications.
         // Admins are notified only for custom_issue_request (via POST /custom-issue).
 
-        // ── บันทึกความจำ: เก็บว่า token เหล่านี้ถูกส่งไปหน่วยงานนี้ ──────────────
-        // ระบบจะ "จำ" และให้ bonus score แก่หน่วยงานนี้ใน complaint ครั้งต่อไป
-        // ที่มี token คล้ายกัน (ถ้าการส่งนี้ถูกต้อง score จะสะสม)
-        if (autoAssignedDepartment) {
-          const memText = `${topic.trim()} ${issue} ${description.trim()} ${location.trim()}`;
-          // v2: pass topic as typeLabel → type-level memory learns from each submission
-          recordMemoryHit(db, memText, autoAssignedDepartment, true, topic.trim()).catch((err) => {
-            console.error('[routingMemory] recordMemoryHit (POST) failed:', err.message);
-          });
-        } else {
-          console.warn('[routingMemory] skip save — no autoAssignedDepartment');
-        }
-        // ─────────────────────────────────────────────────────────────────────────
       } catch (err) {
         console.warn('[notifications] send failed:', err.message);
       }
@@ -611,11 +569,6 @@ router.post('/', verifyToken, async (req, res) => {
       },
     });
 
-    // ─── Socket.IO — broadcast new complaint to officers ─────────────────
-    try {
-      const io = req.app.get('io');
-      if (io) io.to('role:officer').emit('complaint:new', { id: docRef.id });
-    } catch (_) {}
   } catch (error) {
     console.error('Error creating complaint:', error);
     res.status(500).json({ error: 'Failed to create complaint' });
@@ -747,20 +700,6 @@ router.put('/:id', verifyToken, async (req, res) => {
     if (assignedDepartment && (userRole === 'admin' || userRole === 'officer')) {
       updateData.assignedDepartment = assignedDepartment;
 
-      // ── อัปเดตความจำ: ถ้าเปลี่ยนหน่วยงาน = การจัดเส้นทางเดิมผิด ──────────────
-      // บันทึกการแก้ไข: หน่วยงานเก่า (-0.5), หน่วยงานใหม่ (+1.0)
-      // ระบบจะ "เรียนรู้" ว่า token เหล่านี้ควรไปหน่วยงานใหม่แทน
-      if (complaint.assignedDepartment && assignedDepartment !== complaint.assignedDepartment) {
-        const memText = `${complaint.topic || ''} ${complaint.issue || ''} ${complaint.description || ''} ${complaint.location || ''}`;
-        recordMemoryHit(db, memText, complaint.assignedDepartment, false, '').catch((err) => {
-          console.error('[routingMemory] recordMemoryHit (penalize) failed:', err.message);
-        });
-        recordMemoryHit(db, memText, assignedDepartment, true, complaint.topic || '').catch((err) => {
-          console.error('[routingMemory] recordMemoryHit (reinforce) failed:', err.message);
-        });
-        console.log(`[routingMemory] correction: "${complaint.assignedDepartment}" → "${assignedDepartment}"`);
-      }
-      // ─────────────────────────────────────────────────────────────────────────
     }
 
     // Allow note updates for officers/admins
@@ -788,15 +727,6 @@ router.put('/:id', verifyToken, async (req, res) => {
 
     await complaintRef.update(updateData);
 
-    // ─── Socket.IO — real-time complaint update ───────────────────────────
-    try {
-      const io = req.app.get('io');
-      if (io) {
-        const payload = { id: req.params.id, status: status || complaint.status };
-        if (complaint.userId) io.to(complaint.userId).emit('complaint:updated', payload);
-        io.to('role:officer').emit('complaint:updated', payload);
-      }
-    } catch (_) {}
 
     // Notify the complaint owner — fire-and-forget
     (async () => {

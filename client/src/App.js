@@ -23,7 +23,6 @@ import RegisterPage from './pages/auth/RegisterPage';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
-import { SocketProvider } from './SocketContext';
 import './App.css';
 
 function AppContent() {
@@ -108,9 +107,7 @@ function App() {
       <CssBaseline />
       <Router>
         <AuthProvider>
-          <SocketProvider>
-            <AppContent />
-          </SocketProvider>
+          <AppContent />
         </AuthProvider>
       </Router>
     </ThemeProvider>

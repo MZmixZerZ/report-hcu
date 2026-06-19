@@ -18,9 +18,6 @@
 // ความยาวขั้นต่ำของคำที่มีความหมาย (ตัวอักษร)
 const MIN_WORD_LEN = 3;
 
-// นำเข้าระบบความจำ — ใช้ boost คะแนนหน่วยงานที่เคยถูกต้องในอดีต
-const { queryMemoryBoost } = require('./routingMemory');
-
 // คำหยุด (Stop Words) ภาษาไทย — ข้ามคำเหล่านี้ตอน tokenize
 const STOP_WORDS = new Set([
   'และ', 'หรือ', 'ของ', 'ใน', 'ที่', 'การ', 'ให้', 'ได้', 'มี', 'เป็น',
@@ -176,18 +173,6 @@ async function routeComplaintFromDB(db, fields) {
 
           rankList.sort((a, b) => b.score - a.score);
 
-          // ── ผสาน Memory Boost — เพิ่มคะแนนจากประวัติการจัดเส้นทางในอดีต ──
-          const memTokens1 = [...new Set(`${enrichedTitle} ${detailLower}`.split(/\s+/).filter(w => w.length >= 3))];
-          const memBoosts1 = await queryMemoryBoost(db, memTokens1);
-          rankList.forEach(r => {
-            if (memBoosts1[r.name]) {
-              r.score += memBoosts1[r.name];
-              r.memoryBoost = memBoosts1[r.name];
-            }
-          });
-          rankList.sort((a, b) => b.score - a.score);
-          // ─────────────────────────────────────────────────
-
           const totalScore = rankList.reduce((sum, r) => sum + r.score, 0);
           const rankings = rankList.map(r => ({
             ...r,
@@ -248,22 +233,6 @@ async function routeComplaintFromDB(db, fields) {
 
   // เรียงตาม raw score — คะแนน keyword สัมบูรณ์เป็นสัญญาณที่ดีที่สุด
   results.sort((a, b) => b.score - a.score);
-
-  // ── ผสาน Memory Boost — เพิ่มคะแนนจากประวัติการเรียนรู้ ───────────────────
-  // จาก routingTokenMemory: token ใดที่เคยถูกส่งหาหน่วยงานไหนแล้วถูก
-  const memTokens = [...new Set(`${titleLower} ${detailLower}`.split(/\s+/).filter(w => w.length >= 3))];
-  const memBoosts = await queryMemoryBoost(db, memTokens);
-  if (Object.keys(memBoosts).length > 0) {
-    results.forEach(r => {
-      if (memBoosts[r.name]) {
-        r.score += memBoosts[r.name];
-        r.memoryBoost = memBoosts[r.name];
-      }
-    });
-    // เรียงใหม่หลังผสาน memory boost
-    results.sort((a, b) => b.score - a.score);
-  }
-  // ─────────────────────────────────────────────────────────────────
 
   const totalScore = results.reduce((sum, r) => sum + r.score, 0);
   const rankings = results.map(r => ({

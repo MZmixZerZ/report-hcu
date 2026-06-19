@@ -147,10 +147,10 @@ const theme = createTheme({
           },
         }),
         contained: ({ theme }) => ({
-          background: `linear-gradient(135deg, ${HCU.maroon} 0%, ${HCU.maroonDark} 100%)`,
+          background: `linear-gradient(135deg, ${HCU.red} 0%, ${HCU.redDark} 100%)`,
           boxShadow: `0 8px 20px rgba(122, 30, 30, 0.3)`,
           '&:hover': {
-            background: `linear-gradient(135deg, ${HCU.maroonLight} 0%, ${HCU.maroon} 100%)`,
+            background: `linear-gradient(135deg, ${HCU.redLight} 0%, ${HCU.red} 100%)`,
           },
         }),
         outlined: ({ theme }) => ({
@@ -161,7 +161,7 @@ const theme = createTheme({
           },
         }),
         containedSecondary: {
-          background: `linear-gradient(135deg, ${HCU.gold} 0%, ${HCU.goldDark} 100%)`,
+          background: `linear-gradient(135deg, ${HCU.yellow} 0%, ${HCU.yellowDark} 100%)`,
           boxShadow: `0 8px 20px rgba(212, 175, 55, 0.3)`,
           color: '#fff',
         },
@@ -206,7 +206,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: ({ theme }) => ({
-          background: `linear-gradient(135deg, ${HCU.maroon} 0%, ${HCU.maroonDark} 100%)`,
+          background: `linear-gradient(135deg, ${HCU.red} 0%, ${HCU.redDark} 100%)`,
           boxShadow: `0 8px 32px rgba(122, 30, 30, 0.2)`,
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -228,7 +228,7 @@ const theme = createTheme({
             },
             '&.Mui-focused': {
               backgroundColor: `rgba(122, 30, 30, 0.02)`,
-              borderColor: HCU.maroon,
+              borderColor: HCU.red,
               boxShadow: `0 0 0 4px rgba(122, 30, 30, 0.1)`,
             },
           },
@@ -252,11 +252,11 @@ const theme = createTheme({
           color: '#6B7280',
           '&:hover': {
             backgroundColor: `rgba(122, 30, 30, 0.08)`,
-            color: HCU.maroon,
+            color: HCU.red,
           },
           '&.Mui-selected': {
             backgroundColor: `rgba(122, 30, 30, 0.12)`,
-            color: HCU.maroon,
+            color: HCU.red,
             fontWeight: 600,
             '&:hover': {
               backgroundColor: `rgba(122, 30, 30, 0.15)`,
@@ -276,7 +276,7 @@ const theme = createTheme({
         },
         filled: ({ theme }) => ({
           backgroundColor: `rgba(122, 30, 30, 0.1)`,
-          color: HCU.maroon,
+          color: HCU.red,
         }),
       },
     },
@@ -298,7 +298,7 @@ const theme = createTheme({
           fontSize: '0.95rem',
           fontWeight: 700,
           backgroundColor: `rgba(122, 30, 30, 0.08)`,
-          color: HCU.maroon,
+          color: HCU.red,
         },
       },
     },
@@ -311,7 +311,7 @@ const theme = createTheme({
         },
         bar: {
           borderRadius: '8px',
-          background: `linear-gradient(90deg, ${HCU.maroon}, ${HCU.gold})`,
+          background: `linear-gradient(90deg, ${HCU.red}, ${HCU.yellow})`,
         },
       },
     },
@@ -319,7 +319,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '&.Mui-selected': {
-            color: HCU.maroon,
+            color: HCU.red,
           },
         },
       },
@@ -327,7 +327,7 @@ const theme = createTheme({
     MuiTabs: {
       styleOverrides: {
         indicator: {
-          backgroundColor: HCU.maroon,
+          backgroundColor: HCU.red,
         },
       },
     },
