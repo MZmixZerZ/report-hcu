@@ -10,16 +10,16 @@
 
 | Service  | URL |
 |----------|-----|
-| Frontend | [report-hcu.vercel.app](https://report-hcu.vercel.app) |
-| Backend API | [report-hcu-api-production.up.railway.app](https://report-hcu-api-production.up.railway.app/api/status) |
+| Frontend | [report-hcu.vercel.app](https://report-hcu-vvnd.vercel.app) |
+| Backend API | [report-hcu-api-production.up.railway.app](https://report-hcu-production.up.railway.app/api/status) |
 
-> เข้าใช้งานด้วยอีเมล @hcu.ac.th
+> เข้าใช้งานด้วยอีเมล @hcu.ac.th/username
 
 ---
 
 ## Screenshots
 
-> ภาพหน้าจอระบบ — เพิ่มได้ใน `docs/screenshots/`
+> ภาพหน้าจอระบบ
 
 | หน้าหลัก | แดชบอร์ดผู้บริหาร |
 |---|---|
